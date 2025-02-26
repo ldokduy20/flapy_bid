@@ -10,6 +10,8 @@ pub const Pipe = struct {
     top_rect: rl.Rectangle,
     bot_rect: rl.Rectangle,
 
+    passed: bool,
+
     pub fn new(x: i32, y: i32, vel_x: i32, tex: *const rl.Texture2D) Pipe {
         return .{ .x = x, .y = y, .vel_x = vel_x, .tex = tex, .top_rect = rl.Rectangle{
             .x = @floatFromInt((x - @divTrunc(tex.width, 2))),
@@ -21,7 +23,7 @@ pub const Pipe = struct {
             .y = @floatFromInt(y + @divTrunc(GAP, 2)),
             .width = @floatFromInt(tex.width),
             .height = @floatFromInt(tex.height),
-        } };
+        }, .passed = false };
     }
 
     pub fn draw(p: *const Pipe) void {
@@ -79,5 +81,18 @@ pub const Pipe = struct {
         // p.x += p.vel_x;
         p.top_rect.x += @floatFromInt(p.vel_x);
         p.bot_rect.x += @floatFromInt(p.vel_x);
+    }
+
+    pub fn touch(p: *const Pipe, c_center: rl.Vector2, c_radius: f32) bool {
+        // Check collision between circle and rectangle
+        // pub fn checkCollisionCircleRec(center: Vector2, radius: f32, rec: Rectangle) bool {
+        //     return cdef.CheckCollisionCircleRec(center, radius, rec);
+        // }
+        return rl.checkCollisionCircleRec(c_center, c_radius, p.top_rect) or
+            rl.checkCollisionCircleRec(c_center, c_radius, p.bot_rect);
+    }
+    pub fn pass(p: *const Pipe, c_center: rl.Vector2) bool {
+        const pipe_center_x = p.bot_rect.x + (p.bot_rect.width / 2.0);
+        return c_center.x >= pipe_center_x;
     }
 };
